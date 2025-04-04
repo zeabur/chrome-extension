@@ -25,6 +25,15 @@
 				"lovable/content.js"
 			],
 			"run_at": "document_idle"
+		},
+		{
+			"matches": [
+				"https://bolt.new/*"
+			],
+			"js": [
+				"bolt/content.js"
+			],
+			"run_at": "document_idle"
 		}
 	],
 	"web_accessible_resources": [
@@ -34,6 +43,14 @@
 			],
 			"matches": [
 				"https://lovable.dev/*"
+			]
+		},
+		{
+			"resources": [
+				"bolt/zeabur.js"
+			],
+			"matches": [
+				"https://bolt.new/*"
 			]
 		}
 	]
