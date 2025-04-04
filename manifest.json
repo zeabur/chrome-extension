@@ -1,0 +1,40 @@
+{
+	"manifest_version": 3,
+	"name": "Zeabur",
+	"version": "0.1",
+	"permissions": [
+		"scripting",
+		"tabs"
+	],
+	"icons": {
+		"64": "icon64.png"
+	},
+	"description": "Add a “Deploy to Zeabur” button to AI coding tools like Lovable, Bolt.new or v0.dev. One-click deploy to your cloud.",
+	"action": {},
+	"host_permissions": [
+		"https://lovable.dev/*",
+		"https://bolt.new/*",
+		"https://v0.dev/*"
+	],
+	"content_scripts": [
+		{
+			"matches": [
+				"https://lovable.dev/*"
+			],
+			"js": [
+				"lovable/content.js"
+			],
+			"run_at": "document_idle"
+		}
+	],
+	"web_accessible_resources": [
+		{
+			"resources": [
+				"lovable/zeabur.js"
+			],
+			"matches": [
+				"https://lovable.dev/*"
+			]
+		}
+	]
+}
