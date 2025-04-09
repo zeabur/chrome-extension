@@ -2,11 +2,6 @@ const registerLovableDeployButton = async () => {
 	// if button already exists, return
 	if (document.getElementById('lovable-extract-btn')) return;
 
-	// inject jszip
-	const script = document.createElement('script');
-	script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-	document.head.appendChild(script);
-
 	// create deploy to Zeabur button
 	const btn = document.createElement('button');
 	btn.id = 'lovable-extract-btn';

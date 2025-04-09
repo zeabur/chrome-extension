@@ -2,10 +2,7 @@
 	"manifest_version": 3,
 	"name": "Zeabur",
 	"version": "0.1",
-	"permissions": [
-		"scripting",
-		"tabs"
-	],
+	"permissions": [],
 	"icons": {
 		"64": "icon64.png"
 	},
@@ -39,6 +36,7 @@
 	"web_accessible_resources": [
 		{
 			"resources": [
+				"jszip.min.js",
 				"lovable/zeabur.js"
 			],
 			"matches": [
@@ -47,6 +45,7 @@
 		},
 		{
 			"resources": [
+				"jszip.min.js",
 				"bolt/zeabur.js"
 			],
 			"matches": [
