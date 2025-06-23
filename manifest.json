@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "Zeabur",
-	"version": "0.1",
+	"version": "0.2",
 	"permissions": [],
 	"icons": {
 		"64": "icon64.png"
@@ -11,7 +11,8 @@
 	"host_permissions": [
 		"https://lovable.dev/*",
 		"https://bolt.new/*",
-		"https://v0.dev/*"
+		"https://v0.dev/*",
+		"https://claude.ai/*"
 	],
 	"content_scripts": [
 		{
@@ -29,6 +30,15 @@
 			],
 			"js": [
 				"bolt/content.js"
+			],
+			"run_at": "document_idle"
+		},
+		{
+			"matches": [
+				"https://claude.ai/*"
+			],
+			"js": [
+				"claude/content.js"
 			],
 			"run_at": "document_idle"
 		}
@@ -50,6 +60,15 @@
 			],
 			"matches": [
 				"https://bolt.new/*"
+			]
+		},
+		{
+			"resources": [
+				"jszip.min.js",
+				"claude/zeabur.js"
+			],
+			"matches": [
+				"https://claude.ai/*"
 			]
 		}
 	]
