@@ -5,7 +5,7 @@ const registerLovableDeployButton = async () => {
 	// create deploy to Zeabur button
 	const btn = document.createElement('button');
 	btn.id = 'lovable-extract-btn';
-	btn.className = 'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none text-primary hover:opacity-80 [&>*]:text-shadow-sm shadow-black/50 h-7 rounded-md px-2 py-2 gap-1.5';
+	btn.className = 'inline-flex text-affirmative-primary-foreground items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none hover:opacity-80 [&>*]:text-shadow-sm shadow-black/50 h-7 rounded-md px-2 py-2 gap-1.5';
 	btn.style.backgroundColor = '#6300ff';
 
 	const span = document.createElement('span');
