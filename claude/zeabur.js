@@ -22,28 +22,28 @@ const registerClaudeDeployButton = async () => {
 	let isButtonVisible = false;
 
 	setInterval(() => {
-		const codeElements = document.querySelectorAll('code.language-html, code.language-javascript, code.language-python');
-		const codeElement = codeElements.length > 0 ? codeElements[codeElements.length - 1] : null;
+		const buttons = Array.from(document.querySelectorAll('button'));
+		const publishButton = buttons.find(button => button.textContent.trim() === 'Publish');
+		const publishAncestor = getThirdParent(publishButton);
+		const codeElement = findLastCodeElementInAncestor(publishAncestor);
 		const deployButton = document.getElementById('claude-extract-btn');
 
 		if (codeElement && !isButtonVisible) {
-			isButtonVisible = true;
-			const buttons = Array.from(document.querySelectorAll('button'));
-			const publishButton = buttons.find(button => button.textContent.trim() === 'Publish');
 			if (publishButton && !deployButton) {
 				btn.style.opacity = '0';
 				btn.style.transform = 'translateY(5px)';
 				publishButton.parentNode.insertBefore(btn, publishButton);
+				isButtonVisible = true;
 				setTimeout(() => {
 					btn.style.opacity = '1';
 					btn.style.transform = 'translateY(0)';
 				}, 10);
 			}
 		} else if (!codeElement && isButtonVisible) {
-			isButtonVisible = false;
 			if (deployButton) {
 				deployButton.style.opacity = '0';
 				deployButton.style.transform = 'translateY(5px)';
+				isButtonVisible = false;
 				setTimeout(() => {
 					// Re-check if button should be visible before removing
 					if (!isButtonVisible) {
@@ -57,8 +57,10 @@ const registerClaudeDeployButton = async () => {
 
 const getSourceCodeFromClaude = () => {
 	return new Promise((resolve, reject) => {
-		const codeElements = document.querySelectorAll('code.language-html, code.language-javascript, code.language-python');
-		const codeElement = codeElements.length > 0 ? codeElements[codeElements.length - 1] : null;
+		const buttons = Array.from(document.querySelectorAll('button'));
+		const publishButton = buttons.find(button => button.textContent.trim() === 'Publish');
+		const publishAncestor = getThirdParent(publishButton);
+		const codeElement = findLastCodeElementInAncestor(publishAncestor);
 
 		if (codeElement) {
 			const langClass = Array.from(codeElement.classList).find(c => c.startsWith('language-'));
@@ -79,8 +81,10 @@ const getSourceCodeFromClaude = () => {
 			const timeout = 15000;
 
 			const interval = setInterval(() => {
-				const codeElements = document.querySelectorAll('code.language-html, code.language-javascript, code.language-python');
-				const el = codeElements.length > 0 ? codeElements[codeElements.length - 1] : null;
+				const buttons = Array.from(document.querySelectorAll('button'));
+				const publishButton = buttons.find(button => button.textContent.trim() === 'Publish');
+				const publishAncestor = getThirdParent(publishButton);
+				const el = findLastCodeElementInAncestor(publishAncestor);
 
 				if (el) {
 					clearInterval(interval);
@@ -249,6 +253,23 @@ function showUploadError(message) {
 			statusEl.parentNode.removeChild(statusEl);
 		}
 	}, 5000);
+}
+
+// 取得 Publish button 的第三級 parent
+function getThirdParent(el) {
+	if (!el) return null;
+	let parent = el;
+	for (let i = 0; i < 3; i++) {
+		if (!parent.parentNode) return null;
+		parent = parent.parentNode;
+	}
+	return parent;
+}
+
+function findLastCodeElementInAncestor(ancestor) {
+	if (!ancestor) return null;
+	const codeElements = ancestor.querySelectorAll('code.language-html, code.language-javascript, code.language-python');
+	return codeElements.length > 0 ? codeElements[codeElements.length - 1] : null;
 }
 
 registerClaudeDeployButton(); 
