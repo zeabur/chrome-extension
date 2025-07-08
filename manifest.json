@@ -2,17 +2,27 @@
 	"manifest_version": 3,
 	"name": "Zeabur",
 	"version": "0.2.1",
-	"permissions": [],
+	"permissions": [
+		"storage"
+	],
 	"icons": {
 		"64": "icon64.png"
 	},
 	"description": "Add a “Deploy to Zeabur” button to AI coding tools like Lovable, Bolt.new or v0.dev. One-click deploy to your cloud.",
 	"action": {},
+	"background": {
+		"service_worker": "background.js"
+	},
 	"host_permissions": [
 		"https://lovable.dev/*",
 		"https://bolt.new/*",
 		"https://v0.dev/*",
-		"https://claude.ai/*"
+		"https://claude.ai/*",
+		"https://gemini.google.com/*",
+		"https://api.zeabur.com/*",
+		"https://*.amazonaws.com/*",
+		"https://*.r2.cloudflarestorage.com/*",
+		"https://*.storage.googleapis.com/*"
 	],
 	"content_scripts": [
 		{
@@ -39,6 +49,15 @@
 			],
 			"js": [
 				"claude/content.js"
+			],
+			"run_at": "document_idle"
+		},
+		{
+			"matches": [
+				"https://gemini.google.com/*"
+			],
+			"js": [
+				"gemini/content.js"
 			],
 			"run_at": "document_idle"
 		}
@@ -69,6 +88,23 @@
 			],
 			"matches": [
 				"https://claude.ai/*"
+			]
+		},
+		{
+			"resources": [
+				"jszip.min.js",
+				"gemini/zeabur.js"
+			],
+			"matches": [
+				"https://gemini.google.com/*"
+			]
+		},
+		{
+			"resources": [
+				"jszip.min.js"
+			],
+			"matches": [
+				"<all_urls>"
 			]
 		}
 	]
