@@ -2,9 +2,7 @@
 	"manifest_version": 3,
 	"name": "Zeabur",
 	"version": "0.3.1",
-	"permissions": [
-		"storage"
-	],
+	"permissions": [],
 	"icons": {
 		"64": "icon64.png"
 	},
