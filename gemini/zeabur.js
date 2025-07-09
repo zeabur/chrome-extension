@@ -1,6 +1,11 @@
 const registerGeminiDeployButton = async () => {
+	console.log('[Gemini Zeabur] Script loaded, starting registration');
+	
 	// if button already exists, return
-	if (document.getElementById('gemini-extract-btn')) return;
+	if (document.getElementById('gemini-extract-btn')) {
+		console.log('[Gemini Zeabur] Button already exists, skipping registration');
+		return;
+	}
 	
 	// create deploy to Zeabur button
 	const btn = document.createElement('button');
@@ -9,6 +14,7 @@ const registerGeminiDeployButton = async () => {
 	btn.style.height = '32px';
 	btn.style.paddingLeft = '12px';
 	btn.style.paddingRight = '12px';
+	btn.style.marginRight = '8px';
 	btn.style.backgroundColor = '#6300ff';
 	btn.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
 
@@ -30,9 +36,18 @@ const registerGeminiDeployButton = async () => {
 		const shareAncestor = getThirdParent(shareButton);
 		const codeElement = findCodeElementInMonaco();
 		const deployButton = document.getElementById('gemini-extract-btn');
+		
+		console.log('[Gemini Zeabur] Button check:', {
+			totalButtons: buttons.length,
+			shareButtonFound: !!shareButton,
+			codeElementFound: !!codeElement,
+			deployButtonExists: !!deployButton,
+			isButtonVisible: isButtonVisible
+		});
 
 		if (codeElement && !isButtonVisible) {
 			if (shareButton && !deployButton) {
+				console.log('[Gemini Zeabur] Inserting button into DOM');
 				btn.style.opacity = '0';
 				btn.style.transform = 'translateY(5px)';
 				shareButton.parentNode.parentNode.insertBefore(btn, shareButton.parentNode);
@@ -40,10 +55,12 @@ const registerGeminiDeployButton = async () => {
 				setTimeout(() => {
 					btn.style.opacity = '1';
 					btn.style.transform = 'translateY(0)';
+					console.log('[Gemini Zeabur] Button is now visible');
 				}, 10);
 			}
 		} else if (!codeElement && isButtonVisible) {
 			if (deployButton) {
+				console.log('[Gemini Zeabur] Hiding button (no code element)');
 				deployButton.style.opacity = '0';
 				deployButton.style.transform = 'translateY(5px)';
 				isButtonVisible = false;
@@ -51,6 +68,7 @@ const registerGeminiDeployButton = async () => {
 					// Re-check if button should be visible before removing
 					if (!isButtonVisible) {
 						deployButton.remove();
+						console.log('[Gemini Zeabur] Button removed from DOM');
 					}
 				}, 300); // Wait for transition to finish
 			}
@@ -90,12 +108,16 @@ const getSourceCodeFromGemini = () => {
 
 function findCodeElementInMonaco() {
 	const monacoElement = document.querySelector('.monaco-mouse-cursor-text');
+	console.log('[Gemini Zeabur] Monaco element found:', !!monacoElement);
+	
 	if (monacoElement) {
 		// Get all direct child divs
 		const directDivs = Array.from(monacoElement.children).filter(child => child.tagName === 'DIV');
+		console.log('[Gemini Zeabur] Direct divs count:', directDivs.length);
 		
 		// If only one direct div child, consider code not opened (regardless of content)
 		if (directDivs.length <= 1) {
+			console.log('[Gemini Zeabur] Only one div, code not opened');
 			return null;
 		}
 		
@@ -104,6 +126,7 @@ function findCodeElementInMonaco() {
 		
 		// Even if there are multiple divs, check if it's meaningful content
 		if (trimmedContent.length < 5) {
+			console.log('[Gemini Zeabur] Content too short:', trimmedContent.length);
 			return null;
 		}
 		
@@ -120,9 +143,11 @@ function findCodeElementInMonaco() {
 								  trimmedContent.split('\n').length > 1; // Multi-line content
 		
 		if (!hasCodeIndicators) {
+			console.log('[Gemini Zeabur] No code indicators found in content');
 			return null;
 		}
 		
+		console.log('[Gemini Zeabur] Valid code element found with content length:', trimmedContent.length);
 		return monacoElement;
 	}
 	return null;
@@ -304,4 +329,5 @@ function getThirdParent(el) {
 	return parent;
 }
 
+console.log('[Gemini Zeabur] Calling registerGeminiDeployButton');
 registerGeminiDeployButton(); 
