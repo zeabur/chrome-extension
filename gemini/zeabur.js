@@ -39,11 +39,24 @@ const registerGeminiDeployButton = async () => {
 		const codeElement = findCodeElementInMonaco();
 		const deployButton = document.getElementById('gemini-extract-btn');
 
+		// 同步狀態：如果按鈕不存在但 isButtonVisible 是 true，修正狀態
+		if (!deployButton && isButtonVisible) {
+			console.log('[Zeabur Debug] State sync: button missing but marked visible, fixing state');
+			isButtonVisible = false;
+		}
+		
+		// 同步狀態：如果按鈕存在但 isButtonVisible 是 false，修正狀態
+		if (deployButton && !isButtonVisible) {
+			console.log('[Zeabur Debug] State sync: button exists but marked invisible, fixing state');
+			isButtonVisible = true;
+		}
+
 		console.log('[Zeabur Debug] Interval check:', {
 			shareButtonExists: !!shareButton,
 			codeElementExists: !!codeElement,
 			deployButtonExists: !!deployButton,
-			isButtonVisible: isButtonVisible
+			isButtonVisible: isButtonVisible,
+			stateSync: isButtonVisible === !!deployButton
 		});
 
 		if (codeElement && !isButtonVisible) {
@@ -73,12 +86,17 @@ const registerGeminiDeployButton = async () => {
 				deployButton.style.transform = 'translateY(5px)';
 				isButtonVisible = false;
 				setTimeout(() => {
-					// Re-check if button should be visible before removing
-					if (!isButtonVisible) {
+					// 再次檢查狀態，確保一致性
+					const currentDeployButton = document.getElementById('gemini-extract-btn');
+					if (!isButtonVisible && currentDeployButton) {
 						console.log('[Zeabur Debug] Removing button from DOM');
-						deployButton.remove();
+						currentDeployButton.remove();
 					}
 				}, 300); // Wait for transition to finish
+			} else {
+				// 按鈕應該隱藏但已經不存在，直接更新狀態
+				console.log('[Zeabur Debug] Button should be hidden but already missing, updating state');
+				isButtonVisible = false;
 			}
 		}
 	}, 500);
