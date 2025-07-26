@@ -1,6 +1,13 @@
 const registerGeminiDeployButton = async () => {
+	console.log('[Zeabur Debug] registerGeminiDeployButton called');
+	
 	// if button already exists, return
-	if (document.getElementById('gemini-extract-btn')) return;
+	if (document.getElementById('gemini-extract-btn')) {
+		console.log('[Zeabur Debug] Button already exists, returning');
+		return;
+	}
+	
+	console.log('[Zeabur Debug] Creating new Zeabur button');
 	
 	// create deploy to Zeabur button
 	const btn = document.createElement('button');
@@ -25,30 +32,50 @@ const registerGeminiDeployButton = async () => {
 
 	let isButtonVisible = false;
 
+	console.log('[Zeabur Debug] Starting interval to check for button visibility');
+	
 	setInterval(() => {
 		const shareButton = document.querySelector('button[data-test-id="share-button"]');
 		const codeElement = findCodeElementInMonaco();
 		const deployButton = document.getElementById('gemini-extract-btn');
 
+		console.log('[Zeabur Debug] Interval check:', {
+			shareButtonExists: !!shareButton,
+			codeElementExists: !!codeElement,
+			deployButtonExists: !!deployButton,
+			isButtonVisible: isButtonVisible
+		});
+
 		if (codeElement && !isButtonVisible) {
+			console.log('[Zeabur Debug] Conditions met for showing button');
 			if (shareButton && !deployButton) {
+				console.log('[Zeabur Debug] Inserting button into DOM');
 				btn.style.opacity = '0';
 				btn.style.transform = 'translateY(5px)';
 				shareButton.parentNode.parentNode.insertBefore(btn, shareButton.parentNode);
 				isButtonVisible = true;
 				setTimeout(() => {
+					console.log('[Zeabur Debug] Making button visible with animation');
 					btn.style.opacity = '1';
 					btn.style.transform = 'translateY(0)';
 				}, 10);
+			} else {
+				console.log('[Zeabur Debug] Cannot insert button:', {
+					shareButton: !!shareButton,
+					deployButton: !!deployButton
+				});
 			}
 		} else if (!codeElement && isButtonVisible) {
+			console.log('[Zeabur Debug] Conditions met for hiding button');
 			if (deployButton) {
+				console.log('[Zeabur Debug] Hiding button with animation');
 				deployButton.style.opacity = '0';
 				deployButton.style.transform = 'translateY(5px)';
 				isButtonVisible = false;
 				setTimeout(() => {
 					// Re-check if button should be visible before removing
 					if (!isButtonVisible) {
+						console.log('[Zeabur Debug] Removing button from DOM');
 						deployButton.remove();
 					}
 				}, 300); // Wait for transition to finish
@@ -88,43 +115,60 @@ const getSourceCodeFromGemini = () => {
 }
 
 function findCodeElementInMonaco() {
+	console.log('[Zeabur Debug] Looking for monaco element');
 	const monacoElement = document.querySelector('.monaco-mouse-cursor-text');
-	if (monacoElement) {
-		// Get all direct child divs
-		const directDivs = Array.from(monacoElement.children).filter(child => child.tagName === 'DIV');
-		
-		// If only one direct div child, consider code not opened (regardless of content)
-		if (directDivs.length <= 1) {
-			return null;
-		}
-		
-		const textContent = monacoElement.textContent || monacoElement.innerText;
-		const trimmedContent = textContent.trim();
-		
-		// Even if there are multiple divs, check if it's meaningful content
-		if (trimmedContent.length < 5) {
-			return null;
-		}
-		
-		// Check if content looks like actual code (has some programming indicators)
-		const hasCodeIndicators = /[{}()\[\];=<>]/.test(trimmedContent) || 
-								  trimmedContent.includes('function') || 
-								  trimmedContent.includes('class') || 
-								  trimmedContent.includes('def ') ||
-								  trimmedContent.includes('import') ||
-								  trimmedContent.includes('const ') ||
-								  trimmedContent.includes('let ') ||
-								  trimmedContent.includes('var ') ||
-								  trimmedContent.includes('<') ||
-								  trimmedContent.split('\n').length > 1; // Multi-line content
-		
-		if (!hasCodeIndicators) {
-			return null;
-		}
-		
-		return monacoElement;
+	
+	if (!monacoElement) {
+		console.log('[Zeabur Debug] Monaco element not found');
+		return null;
 	}
-	return null;
+	
+	console.log('[Zeabur Debug] Monaco element found, checking children');
+	
+	// Get all direct child divs
+	const directDivs = Array.from(monacoElement.children).filter(child => child.tagName === 'DIV');
+	
+	console.log('[Zeabur Debug] Direct div children count:', directDivs.length);
+	
+	// If only one direct div child, consider code not opened (regardless of content)
+	if (directDivs.length <= 1) {
+		console.log('[Zeabur Debug] Not enough div children, code not opened');
+		return null;
+	}
+	
+	const textContent = monacoElement.textContent || monacoElement.innerText;
+	const trimmedContent = textContent.trim();
+	
+	console.log('[Zeabur Debug] Text content length:', trimmedContent.length);
+	console.log('[Zeabur Debug] Text content preview:', trimmedContent.substring(0, 100));
+	
+	// Even if there are multiple divs, check if it's meaningful content
+	if (trimmedContent.length < 5) {
+		console.log('[Zeabur Debug] Content too short');
+		return null;
+	}
+	
+	// Check if content looks like actual code (has some programming indicators)
+	const hasCodeIndicators = /[{}()\[\];=<>]/.test(trimmedContent) || 
+							  trimmedContent.includes('function') || 
+							  trimmedContent.includes('class') || 
+							  trimmedContent.includes('def ') ||
+							  trimmedContent.includes('import') ||
+							  trimmedContent.includes('const ') ||
+							  trimmedContent.includes('let ') ||
+							  trimmedContent.includes('var ') ||
+							  trimmedContent.includes('<') ||
+							  trimmedContent.split('\n').length > 1; // Multi-line content
+	
+	console.log('[Zeabur Debug] Has code indicators:', hasCodeIndicators);
+	
+	if (!hasCodeIndicators) {
+		console.log('[Zeabur Debug] No code indicators found');
+		return null;
+	}
+	
+	console.log('[Zeabur Debug] Code element found and validated');
+	return monacoElement;
 }
 
 function detectFileType(code) {
