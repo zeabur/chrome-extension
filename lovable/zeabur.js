@@ -57,7 +57,13 @@ const getSourceCodeFromLovable = () => {
 		const interval = setInterval(() => {
 			if (codeFiber) {
 				clearInterval(interval);
-				resolve(codeFiber.props.code);
+				
+				const code = codeFiber.props.code;
+				
+				// Simple conversion: [{path, contents}] -> [[path, contents]]
+				const codeArray = code.map(file => [file.path, file.contents]);
+				
+				resolve(codeArray);
 			} else if (Date.now() - startTime > timeout) {
 				clearInterval(interval);
 				reject(new Error('Timeout: codeFiber not found'));
