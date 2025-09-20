@@ -14,7 +14,7 @@ const registerLovableDeployButton = async () => {
 	btn.appendChild(span);
 
 	btn.onclick = async () => {
-		toggleLovableCodeViewer();
+		await toggleLovableCodeViewer();
 		const sourceCode = await getSourceCodeFromLovable();
 		uploadToZeabur(sourceCode);
 	};
@@ -57,7 +57,13 @@ const getSourceCodeFromLovable = () => {
 		const interval = setInterval(() => {
 			if (codeFiber) {
 				clearInterval(interval);
-				resolve(codeFiber.props.code);
+				
+				const code = codeFiber.props.code;
+				
+				// Simple conversion: [{path, contents}] -> [[path, contents]]
+				const codeArray = code.map(file => [file.path, file.contents]);
+				
+				resolve(codeArray);
 			} else if (Date.now() - startTime > timeout) {
 				clearInterval(interval);
 				reject(new Error('Timeout: codeFiber not found'));
@@ -105,8 +111,22 @@ function walkFiber(fiber, depth = 0) {
 const toggleLovableCodeViewer = () => {
 	const button = document.querySelector('button[aria-label="Code viewer"]');
 
-	if (button && button.getAttribute('data-state') === 'off') {
-		button.click();
+	if (button) {
+		const currentState = button.getAttribute('data-state');
+		
+		// Click if closed or off
+		if (currentState === 'closed' || currentState === 'off') {
+			button.click();
+			
+			// Wait a bit for the code viewer to open
+			return new Promise(resolve => {
+				setTimeout(resolve, 1000);
+			});
+		} else {
+			return Promise.resolve();
+		}
+	} else {
+		return Promise.resolve();
 	}
 }
 
