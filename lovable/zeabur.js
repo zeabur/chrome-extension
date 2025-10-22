@@ -109,10 +109,31 @@ function walkFiber(fiber, depth = 0) {
 }
 
 const toggleLovableCodeViewer = () => {
-	const button = document.querySelector('button[aria-label="Code viewer"]');
+	// Try multiple methods to find the code viewer button
+	
+	// Method 1: Find button by the code icon SVG path
+	let button = Array.from(document.querySelectorAll('button')).find(btn => {
+		const svg = btn.querySelector('svg path');
+		return svg && svg.getAttribute('d')?.includes('M13.272 3.818') && svg.getAttribute('d')?.includes('M6.47 7.47');
+	});
+	
+	// Method 2: Find by data-state parent
+	if (!button) {
+		const divWithState = document.querySelector('div[data-state="closed"], div[data-state="open"]');
+		if (divWithState) {
+			button = divWithState.querySelector('button');
+		}
+	}
+	
+	// Method 3: Old method (fallback)
+	if (!button) {
+		button = document.querySelector('button[aria-label="Code viewer"]');
+	}
 
 	if (button) {
-		const currentState = button.getAttribute('data-state');
+		// Check parent div for state
+		const parentDiv = button.closest('div[data-state]');
+		const currentState = parentDiv ? parentDiv.getAttribute('data-state') : button.getAttribute('data-state');
 		
 		// Click if closed or off
 		if (currentState === 'closed' || currentState === 'off') {
