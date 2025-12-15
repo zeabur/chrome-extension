@@ -46,9 +46,26 @@ const getSourceCodeFromLovable = () => {
 		const main = document.querySelector('main');
 		let fiber = getReactFiberFromDom(main);
 		let fibers = walkFiber(fiber);
-
-		// find fiber with props "code" and "currentFile"
-		let codeFiber = fibers.find(f => f.props?.code && f.props.currentFile);
+		
+		// Prioritize finding iM fiber (contains code array)
+		let codeFiber = fibers.find(f => f.name === 'iM' && f.props?.code && Array.isArray(f.props.code));
+		
+		// If not found, try other possible structures
+		if (!codeFiber) {
+			codeFiber = fibers.find(f => f.props?.code && Array.isArray(f.props.code));
+		}
+		
+		if (!codeFiber) {
+			codeFiber = fibers.find(f => f.props?.code && f.props.currentFile);
+		}
+		
+		if (!codeFiber) {
+			codeFiber = fibers.find(f => f.props?.files);
+		}
+		
+		if (!codeFiber) {
+			codeFiber = fibers.find(f => f.props?.sourceCode || f.props?.source);
+		}
 
 		// Loop until codeFiber is found or a timeout occurs
 		const startTime = Date.now();
@@ -58,19 +75,74 @@ const getSourceCodeFromLovable = () => {
 			if (codeFiber) {
 				clearInterval(interval);
 				
-				const code = codeFiber.props.code;
+				let codeArray = [];
 				
-				// Simple conversion: [{path, contents}] -> [[path, contents]]
-				const codeArray = code.map(file => [file.path, file.contents]);
+				// Handle different code structures
+				if (codeFiber.props.code && Array.isArray(codeFiber.props.code)) {
+					const code = codeFiber.props.code;
+					
+					codeArray = code.map(file => {
+						if (typeof file === 'object' && file !== null) {
+							// Try multiple possible property names
+							const path = file.path || file.name || file.file || file.fileName || file.filename;
+							const contents = file.contents || file.content || file.code || file.text || file.data;
+							
+							if (path && contents !== undefined) {
+								return [path, contents];
+							}
+							
+							// If it's array format [path, contents]
+							if (Array.isArray(file) && file.length >= 2) {
+								return [file[0], file[1]];
+							}
+						} else if (Array.isArray(file) && file.length >= 2) {
+							// Directly [path, contents] array
+							return [file[0], file[1]];
+						}
+						
+						return null;
+					}).filter(Boolean);
+				} else if (codeFiber.props.files) {
+					// Bolt format: {path: {type, content}}
+					const files = codeFiber.props.files;
+					for (const [key, value] of Object.entries(files)) {
+						if (value.type === 'folder') continue;
+						codeArray.push([key.replace('/home/project/', ''), value.content || value.contents || '']);
+					}
+				} else if (codeFiber.props.sourceCode) {
+					// Single sourceCode
+					codeArray = [['index.js', codeFiber.props.sourceCode]];
+				} else if (codeFiber.props.source) {
+					// Single source
+					codeArray = [['index.js', codeFiber.props.source]];
+				}
 				
-				resolve(codeArray);
+				if (codeArray.length > 0) {
+					resolve(codeArray);
+				} else {
+					reject(new Error('Unable to parse code structure'));
+				}
 			} else if (Date.now() - startTime > timeout) {
 				clearInterval(interval);
 				reject(new Error('Timeout: codeFiber not found'));
 			} else {
 				fiber = getReactFiberFromDom(main);
 				fibers = walkFiber(fiber);
-				codeFiber = fibers.find(f => f.props?.code && f.props.currentFile);
+				
+				// Retry search (using same priority order)
+				codeFiber = fibers.find(f => f.name === 'iM' && f.props?.code && Array.isArray(f.props.code));
+				if (!codeFiber) {
+					codeFiber = fibers.find(f => f.props?.code && Array.isArray(f.props.code));
+				}
+				if (!codeFiber) {
+					codeFiber = fibers.find(f => f.props?.code && f.props.currentFile);
+				}
+				if (!codeFiber) {
+					codeFiber = fibers.find(f => f.props?.files);
+				}
+				if (!codeFiber) {
+					codeFiber = fibers.find(f => f.props?.sourceCode || f.props?.source);
+				}
 			}
 		}, 500);
 	});
@@ -234,7 +306,7 @@ async function uploadToZeabur(codeArray) {
 
 	} catch (err) {
 		console.error('Upload error:', err);
-		showUploadError('上傳失敗: ' + err.message);
+		showUploadError('Upload failed: ' + err.message);
 	}
 }
 
